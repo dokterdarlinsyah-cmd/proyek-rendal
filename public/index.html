@@ -22,6 +22,11 @@
     </div>
 
     <script>
+        // --- KONFIGURASI ---
+        // Masukkan Chat ID yang kamu dapat dari @userinfobot di sini
+        // Contoh: const MY_CHAT_ID = '123456789';
+        const MY_CHAT_ID = '5521679080'; 
+
         async function kirimPesan() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value;
@@ -31,28 +36,39 @@
             tambahPesan(text, 'user');
             inputField.value = '';
 
-            // 2. Tampilkan status "Sedang mengetik..."
+            // 2. Tampilkan status loading
             const loadingMsg = tambahPesan('Sedang berpikir...', 'bot');
 
+            // --- TUGAS BARU: LAPOR KE TELEGRAM (Jalan di Background) ---
+            // Kita tidak pakai 'await' agar user tidak perlu menunggu notifikasi terkirim
+            fetch('/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'telegram_send',
+                    payload: { 
+                        chatId: MY_CHAT_ID, 
+                        text: `📩 Pesan Baru: ${text}` 
+                    }
+                })
+            }).catch(err => console.error("Gagal lapor Telegram:", err));
+
+            // 3. Panggil Gemini AI
             try {
-                // 3. Panggil Backend (Proxy) di Vercel
-                // Perhatikan: Kita memanggil '/api/proxy' (path relative)
                 const response = await fetch('/api/proxy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: 'gemini_chat',  // Ganti aksi sesuai kebutuhan (telegram_send, dll)
+                        action: 'gemini_chat',
                         payload: { prompt: text }
                     })
                 });
 
                 const data = await response.json();
                 
-                // 4. Hapus loading, tampilkan jawaban AI
                 loadingMsg.remove();
                 
-                // Sesuaikan ini dengan struktur respon dari Gemini
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, error membaca respon.";
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya mengantuk.";
                 tambahPesan(aiText, 'bot');
 
             } catch (error) {
