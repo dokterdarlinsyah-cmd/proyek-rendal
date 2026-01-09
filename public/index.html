@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendal AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>🤖 Rendal AI Chat</h2>
+        
+        <div id="chat-box">
+            <div class="message bot">Halo! Saya AI Rendal. Ada yang bisa dibantu?</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ketik pesan..." />
+            <button onclick="kirimPesan()">Kirim</button>
+        </div>
+    </div>
+
+    <script>
+        async function kirimPesan() {
+            const inputField = document.getElementById('userInput');
+            const text = inputField.value;
+            if (!text) return;
+
+            // 1. Tampilkan pesan user di layar
+            tambahPesan(text, 'user');
+            inputField.value = '';
+
+            // 2. Tampilkan status "Sedang mengetik..."
+            const loadingMsg = tambahPesan('Sedang berpikir...', 'bot');
+
+            try {
+                // 3. Panggil Backend (Proxy) di Vercel
+                // Perhatikan: Kita memanggil '/api/proxy' (path relative)
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'gemini_chat',  // Ganti aksi sesuai kebutuhan (telegram_send, dll)
+                        payload: { prompt: text }
+                    })
+                });
+
+                const data = await response.json();
+                
+                // 4. Hapus loading, tampilkan jawaban AI
+                loadingMsg.remove();
+                
+                // Sesuaikan ini dengan struktur respon dari Gemini
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, error membaca respon.";
+                tambahPesan(aiText, 'bot');
+
+            } catch (error) {
+                loadingMsg.innerText = "Error: " + error.message;
+            }
+        }
+
+        function tambahPesan(text, sender) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return div;
+        }
+    </script>
+</body>
+</html>
