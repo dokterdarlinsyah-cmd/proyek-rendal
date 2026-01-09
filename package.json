@@ -1,0 +1,11 @@
+{
+  "name": "proyek-rendal-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node api/proxy.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "18.x"
+  }
+}
