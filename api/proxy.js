@@ -1,10 +1,10 @@
 // Simpan file ini di folder: /api/proxy.js
-// Ini adalah Serverless Function untuk menyembunyikan Token dari Frontend
 
-export default async function handler(req, res) {
-  // 1. Setup CORS agar bisa diakses dari Frontend Anda
+// Perubahan: Menggunakan module.exports agar kompatibel dengan package.json Anda
+module.exports = async (req, res) => {
+  // 1. Setup CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Ganti '*' dengan domain frontend Anda untuk lebih aman
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -21,11 +21,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // --- MODIFIKASI DIMULAI DARI SINI ---
-  // Kita ambil 'accessCode' dari body request bersamaan dengan action dan payload
   const { action, payload } = req.body;
 
   try {
+
+    // ==========================================
     // 1. AKSI VERIFIKASI (verify_access)
     // ==========================================
     if (action === 'verify_access') {
@@ -43,7 +43,10 @@ export default async function handler(req, res) {
         return res.status(401).json({ success: false, error: 'Kode Akses Salah' });
       }
     }
-    // --- AKSI GITHUB ---
+
+    // ==========================================
+    // 2. AKSI GITHUB
+    // ==========================================
     if (action === 'github_fetch') {
       const { owner, repo, path } = payload;
       const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
@@ -99,7 +102,9 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    // --- AKSI TELEGRAM ---
+    // ==========================================
+    // 3. AKSI TELEGRAM
+    // ==========================================
     if (action === 'telegram_send') {
       const { chatId, text } = payload;
       const url = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`;
@@ -122,7 +127,9 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
 
-    // --- AKSI GEMINI AI ---
+    // ==========================================
+    // 4. AKSI GEMINI AI
+    // ==========================================
     if (action === 'gemini_chat') {
       const { prompt } = payload;
       const apiKey = process.env.GEMINI_API_KEY;
@@ -143,10 +150,11 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
 
+    // Jika action tidak dikenali
     return res.status(400).json({ error: 'Unknown action' });
 
   } catch (error) {
     console.error("Proxy Error:", error);
     return res.status(500).json({ error: error.message });
   }
-}
+};
