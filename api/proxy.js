@@ -21,7 +21,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { action, payload } = req.body;
+  // --- MODIFIKASI DIMULAI DARI SINI ---
+  // Kita ambil 'accessCode' dari body request bersamaan dengan action dan payload
+  const { action, payload, accessCode } = req.body;
+
   // Validasi Kode Akses
   const SERVER_ACCESS_CODE = process.env.ACCESS_CODE;
 
@@ -36,6 +39,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Akses Ditolak: Kode Akses Salah atau Tidak Ada' });
   }
   // --- MODIFIKASI BERAKHIR ---
+
   try {
     // --- AKSI GITHUB ---
     if (action === 'github_fetch') {
