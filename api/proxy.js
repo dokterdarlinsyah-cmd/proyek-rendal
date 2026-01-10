@@ -27,8 +27,8 @@ export default async function handler(req, res) {
 
   try {
     // --- AKSI VERIFIKASI KODE (BARU DITAMBAHKAN) ---
-    // Pastikan frontend mengirim action: 'verify_code'
-    if (action === 'verify_code') {
+    // Pastikan frontend mengirim action: 'verify_access'
+    if (action === 'verify_access') {
       const { code } = payload; // Input dari user di frontend
       const correctCode = process.env.ACCESS_CODE; // Kode rahasia dari Vercel Env
 
