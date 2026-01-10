@@ -26,18 +26,33 @@ export default async function handler(req, res) {
   const { action, payload, accessCode } = req.body;
 
   // Validasi Kode Akses
-  const SERVER_ACCESS_CODE = process.env.ACCESS_CODE;
+  const VERIFY_ACCESS = process.env.ACCESS_CODE;
 
-  // Jika Environment Variable belum disetting di Vercel, kita beri peringatan (opsional)
+  // 1. Tentukan kode mana yang akan diperiksa. 
+  // Jika action adalah 'verify_access', kode biasanya ada di dalam 'payload.code'.
+  // Untuk action lain, kode harusnya ada di 'accessCode' (root body).
+  const codeToCheck = accessCode || (payload && payload.code);
+
   if (!SERVER_ACCESS_CODE) {
-      console.error("SERVER ERROR: ACCESS_CODE environment variable not set.");
+      console.error("SERVER ERROR: ACCESS_CODE env variable not set.");
       return res.status(500).json({ error: 'Server misconfiguration' });
   }
 
-  // Cek apakah kode yang dikirim user cocok dengan yang di server
-  if (accessCode !== SERVER_ACCESS_CODE) {
-      return res.status(401).json({ error: 'Akses Ditolak: Kode Akses Salah atau Tidak Ada' });
+  // 2. Cek kecocokan kode
+  if (codeToCheck !== SERVER_ACCESS_CODE) {
+      return res.status(401).json({ error: 'Kode Akses Salah' });
   }
+
+  try {
+    // --- AKSI BARU: VERIFY ACCESS ---
+    // Jika sampai di sini, berarti kode di atas sudah benar (lolos cek).
+    // Kita tinggal kembalikan status sukses.
+    if (action === 'verify_access') {
+       return res.status(200).json({ 
+         success: true, 
+         message: 'Akses Diterima' 
+       });
+    }
   // --- MODIFIKASI BERAKHIR ---
 
   try {
