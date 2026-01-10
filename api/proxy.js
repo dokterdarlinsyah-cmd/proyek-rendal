@@ -22,7 +22,20 @@ export default async function handler(req, res) {
   }
 
   const { action, payload } = req.body;
+  // Validasi Kode Akses
+  const SERVER_ACCESS_CODE = process.env.ACCESS_CODE;
 
+  // Jika Environment Variable belum disetting di Vercel, kita beri peringatan (opsional)
+  if (!SERVER_ACCESS_CODE) {
+      console.error("SERVER ERROR: ACCESS_CODE environment variable not set.");
+      return res.status(500).json({ error: 'Server misconfiguration' });
+  }
+
+  // Cek apakah kode yang dikirim user cocok dengan yang di server
+  if (accessCode !== SERVER_ACCESS_CODE) {
+      return res.status(401).json({ error: 'Akses Ditolak: Kode Akses Salah atau Tidak Ada' });
+  }
+  // --- MODIFIKASI BERAKHIR ---
   try {
     // --- AKSI GITHUB ---
     if (action === 'github_fetch') {
