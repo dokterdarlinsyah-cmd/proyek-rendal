@@ -26,26 +26,23 @@ export default async function handler(req, res) {
   const { action, payload } = req.body;
 
   try {
-    // --- AKSI VERIFIKASI KODE (BARU DITAMBAHKAN) ---
-    // Pastikan frontend mengirim action: 'verify_access'
+    // 1. AKSI VERIFIKASI (verify_access)
+    // ==========================================
     if (action === 'verify_access') {
-      const { code } = payload; // Input dari user di frontend
-      const correctCode = process.env.ACCESS_CODE; // Kode rahasia dari Vercel Env
+      const { code } = payload; 
+      const correctCode = process.env.ACCESS_CODE; 
 
-      // Cek apakah ACCESS_CODE sudah di-set di Vercel
       if (!correctCode) {
-        console.error("ACCESS_CODE belum disetting di Vercel!");
-        return res.status(500).json({ error: 'Server misconfiguration' });
+        console.error("Server Error: ACCESS_CODE variable is missing in Vercel.");
+        return res.status(500).json({ error: 'Server configuration error' });
       }
 
-      // Bandingkan kode
       if (code === correctCode) {
-        return res.status(200).json({ success: true, message: 'Kode Valid' });
+        return res.status(200).json({ success: true, message: 'Akses Diterima' });
       } else {
-        return res.status(401).json({ success: false, error: 'Kode Salah' });
+        return res.status(401).json({ success: false, error: 'Kode Akses Salah' });
       }
     }
-    // ------------------------------------------------
     // --- AKSI GITHUB ---
     if (action === 'github_fetch') {
       const { owner, repo, path } = payload;
