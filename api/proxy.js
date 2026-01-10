@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
   // --- MODIFIKASI DIMULAI DARI SINI ---
   // Kita ambil 'accessCode' dari body request bersamaan dengan action dan payload
-  const { action, payload, accessCode } = req.body;
+  const { action, payload } = req.body;
 
   // Validasi Kode Akses
   const VERIFY_ACCESS = process.env.ACCESS_CODE;
