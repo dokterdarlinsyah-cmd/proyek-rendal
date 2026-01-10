@@ -25,36 +25,6 @@ export default async function handler(req, res) {
   // Kita ambil 'accessCode' dari body request bersamaan dengan action dan payload
   const { action, payload } = req.body;
 
-  // Validasi Kode Akses
-  const VERIFY_ACCESS = process.env.ACCESS_CODE;
-
-  // 1. Tentukan kode mana yang akan diperiksa. 
-  // Jika action adalah 'verify_access', kode biasanya ada di dalam 'payload.code'.
-  // Untuk action lain, kode harusnya ada di 'accessCode' (root body).
-  const codeToCheck = accessCode || (payload && payload.code);
-
-  if (!SERVER_ACCESS_CODE) {
-      console.error("SERVER ERROR: ACCESS_CODE env variable not set.");
-      return res.status(500).json({ error: 'Server misconfiguration' });
-  }
-
-  // 2. Cek kecocokan kode
-  if (codeToCheck !== SERVER_ACCESS_CODE) {
-      return res.status(401).json({ error: 'Kode Akses Salah' });
-  }
-
-  try {
-    // --- AKSI BARU: VERIFY ACCESS ---
-    // Jika sampai di sini, berarti kode di atas sudah benar (lolos cek).
-    // Kita tinggal kembalikan status sukses.
-    if (action === 'verify_access') {
-       return res.status(200).json({ 
-         success: true, 
-         message: 'Akses Diterima' 
-       });
-    }
-  // --- MODIFIKASI BERAKHIR ---
-
   try {
     // --- AKSI GITHUB ---
     if (action === 'github_fetch') {
